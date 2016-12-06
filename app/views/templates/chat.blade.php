@@ -72,8 +72,9 @@
             el: '#chat',
             data: {
                 conversations:[],
-                current_conversation:"{{ Session::get('current_conversation') }}",
+                current_conversation:[],
                 messages:[],
+                user_id: "{{ Auth::user()->id }}",
             },
             ready: function () {
                 this.chat();
@@ -82,14 +83,8 @@
                 chat : function (conversation) {
                     var request={conversation: conversation };
                     this.$http.post("/chat",request,function(response) {
-                        /*if (response.current_conversation==null) {
-                            this.current_conversation = '';
-                        } else {
-                            this.current_conversation= response.current_conversation.name;
-                        }*/
+                        this.current_conversation= response.current_conversation;
                         this.conversations= response.conversations;
-                        this.messages= response.messages;
-                        //this.areas= response.areas;
                         this.scrollToBottom();
                     });
                 },
@@ -112,4 +107,4 @@
     <script src="{{ asset('/js/chat.js')}}"></script>
 @stop
 
-{{-- @include('templates/new_message_modal', array('recipients' => $recipients)) --}}
+@include('templates/new_message_modal', array('recipients' => $recipients))
