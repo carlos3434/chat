@@ -70,11 +70,23 @@ class ConversationController extends \BaseController {
             'name'          => str_random(30),
             'author_id'  => Auth::user()->id
         );
+        //buscar en conversations_users, si el Input::get('users') y array(Auth::user()->id) ya pertenecen a la misma conversation_id
+        $users = array_merge(Input::get('users'),[(string)Auth::user()->id]);
 
-        $conversation = Conversation::create($params);
+        $sql="SELECT conversation_id , COUNT(user_id)
+        FROM conversations_users 
+        WHERE user_id IN (?,?)
+        GROUP BY conversation_id
+        HAVING COUNT(user_id)>1";
+        $cantidad = DB::select($sql,$users);
+        if (count($cantidad)>0) {
+            $conversation=Conversation::find($cantidad[0]->conversation_id);
+        } else {
+            $conversation = Conversation::create($params);
 
-        $conversation->users()->attach(Input::get('users'));
-        $conversation->users()->attach(array(Auth::user()->id));
+            $conversation->users()->attach(Input::get('users'));
+            $conversation->users()->attach(array(Auth::user()->id));
+        }
 
         // Create Message
         $params = array(
