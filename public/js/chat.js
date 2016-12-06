@@ -6,7 +6,7 @@ $(function() {
 
     scrollToBottom();
 
-    var socket = io('http://localhost:3000'),
+    var socket = io('http://chat:3000'),
 
         jqxhr  = $.ajax({
             url: '/users/' + user_id + '/conversations',

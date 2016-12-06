@@ -7,8 +7,6 @@ var
 
 app.listen(3000);
 
-console.log('Realtime Chat Server running at http://127.0.0.1:3000/');
-
 function handler (req, res) {
 	fs.readFile(__dirname + '/index.html', function(err, data) {
         if(err) {

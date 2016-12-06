@@ -31,7 +31,7 @@
             </div>
         </div>
     </nav>
-    <div class="container">
+    <div class="container" id='chat'>
         <div class="row">
             <div class="col-lg-3 new-message text-right">
                 <a id="btnNewMessage" class="btn btn-sm btn-default" role="button"><i class="fa fa-plus"></i> New Message</a>
@@ -39,7 +39,7 @@
         </div>
         <div class="row">
             <div id="conversationList">
-                @include('templates/conversations', array('conversations' => $conversations, 'current_conversation' => $current_conversation))
+                @include('templates/conversations', array('conversations' => $conversations))
             </div>
             <div class="col-lg-8">
                 @if($current_conversation)
@@ -65,8 +65,51 @@
         var
             current_conversation = "{{ Session::get('current_conversation') }}",
             user_id   = "{{ Auth::user()->id }}";
+        var vm = new Vue({
+            http: {
+                root: '/root'
+            },
+            el: '#chat',
+            data: {
+                conversations:[],
+                current_conversation:"{{ Session::get('current_conversation') }}",
+                messages:[],
+            },
+            ready: function () {
+                this.chat();
+            },
+            methods: {
+                chat : function (conversation) {
+                    var request={conversation: conversation };
+                    this.$http.post("/chat",request,function(response) {
+                        /*if (response.current_conversation==null) {
+                            this.current_conversation = '';
+                        } else {
+                            this.current_conversation= response.current_conversation.name;
+                        }*/
+                        this.conversations= response.conversations;
+                        this.messages= response.messages;
+                        //this.areas= response.areas;
+                        this.scrollToBottom();
+                    });
+                },
+                showModal: function (){
+                    $('#newMessageModal').modal('show');
+                },
+                scrollToBottom: function() {
+                    this.handle = setInterval( ( ) => {
+                        var $messageList  = $("#messageList");
+
+                        if($messageList.length) {
+                            $messageList.animate({scrollTop: $messageList[0].scrollHeight}, 500);
+                        }
+                        clearInterval(this.handle);
+                    },1);
+                }
+            }
+        });
     </script>
     <script src="{{ asset('/js/chat.js')}}"></script>
 @stop
 
-@include('templates/new_message_modal', array('recipients' => $recipients))
+{{-- @include('templates/new_message_modal', array('recipients' => $recipients)) --}}

@@ -17,7 +17,11 @@ App::bind('LaravelRealtimeChat\Repositories\User\UserRepository', 'LaravelRealti
 Route::get('/', function() {
 	return Redirect::route('auth.postLogin');
 });
-
+Route::post('/chat/', array(
+    'before' => 'authChat',
+    'as'     => 'chat.index',
+    'uses'   => 'ChatController@conversation'
+));
 Route::get('/login', array(
 	'as'   => 'auth.getLogin',
 	'uses' => 'AuthController@getLogin'
