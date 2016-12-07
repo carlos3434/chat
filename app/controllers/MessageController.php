@@ -8,11 +8,20 @@ class MessageController extends \BaseController {
      * @return Response
      */
     public function index() {
-
+        
         $conversation = Conversation::where('name', Input::get('conversation'))->first();
         $messages       = Message::where('conversation_id', $conversation->id)->orderBy('created_at')->get();
-
-        return View::make('templates/messages')->with('messages', $messages)->render();
+        $messages = $messages->map(function($message){
+            return [
+                'body' => $message->body,
+                'created_at' => $message->created_at->format('Y-m-d H:i:s'),
+                'user'   => $message->user,
+                'nemonico'    => $message->user->areas->nemonico,
+            ];
+        });
+        $response = ['messages'=>$messages];
+        return Response::json($response);
+        //return View::make('templates/messages')->with('messages', $messages)->render();
     }
 
     /**

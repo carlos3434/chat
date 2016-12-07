@@ -56,7 +56,14 @@ class ChatController extends \BaseController {
             });
             $current=false;
             if ($conversation->name==$current_conversation->name){
-                $current_conversation->messages=$conversation->messages;
+                $current_conversation->messages = $conversation->messages->map(function($message){
+                    return [
+                        'created_at'    => $message->created_at->format('Y-m-d H:i:s'),
+                        'user'          => $message->user,
+                        'nemonico'      => $message->user->areas->nemonico,
+                        'body'          => $message->body,
+                    ];
+                });
                 $current=true;
             }
             return [

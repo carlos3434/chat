@@ -42,7 +42,8 @@ $(function() {
         getMessages(conversation).done(function(data) {
             $conversation.find('small').text(message);
             if(conversation === current_conversation) {
-                $messageList.html(data);
+                //$messageList.html(data);
+                vm.current_conversation.messages=data.messages;
                 scrollToBottom();
             }
             if(from_user_id !== user_id && conversation !== current_conversation) {
@@ -79,7 +80,7 @@ $(function() {
                 url: '/messages',
                 type: 'GET',
                 data: { conversation: conversation },
-                dataType: 'html'
+                dataType: 'json'
             });
         return jqxhr;
     }

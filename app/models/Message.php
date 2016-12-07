@@ -20,4 +20,13 @@ class Message extends Eloquent {
     public function messages_notifications() {
         return $this->hasMany('MessageNotification', 'message_id', 'id');
     }
+    public function getCreateAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('Y-m-d H:i:s');
+    }
+
+    public function setCreateAtAttribute($value)
+    {
+        $this->attributes['create_at'] = Carbon::createFromFormat('Y-m-d H:i:s', $value)->toDateString();
+    }
 }

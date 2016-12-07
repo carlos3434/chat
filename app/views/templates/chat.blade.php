@@ -39,22 +39,20 @@
         </div>
         <div class="row">
             <div id="conversationList">
-                @include('templates/conversations', array('conversations' => $conversations))
+                @include('templates/conversations')
             </div>
             <div class="col-lg-8">
-                @if($current_conversation)
+                <template v-if="current_conversation.name">
                     <div class="panel panel-default">
                         <div id="messageList" class="panel-body messages-panel">
-                            @include('templates/messages', array('messages' => $current_conversation->messages))
+                            @include('templates/messages')
                         </div>
                     </div>
-                    {{ Form::open(array('action' => 'MessageController@store')) }}
-                        <textarea id="messageBox" class="form-control send-message" rows="3" placeholder="Write a reply..."></textarea>
-                        <div class="send-message">
-                            <a id="btnSendMessage" class="text-right btn btn-sm btn-danger pull-right" role="button"><i class="fa fa-send"></i> Send Message</a>
-                        </div>
-                    {{ Form::close() }}
-                @endif
+                    <textarea @keyup.prevent="handleKeypress" v-model='messageBox' class="form-control send-message" rows="3" placeholder="Escribe una respuesta..."></textarea>
+                    <div class="send-message">
+                        <a @click.prevent="sendMessage" class="text-right btn btn-sm btn-danger pull-right" role="button"><i class="fa fa-send"></i> Enviar mensaje</a>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -83,10 +81,31 @@
                 chat : function (conversation) {
                     var request={conversation: conversation };
                     this.$http.post("/chat",request,function(response) {
-                        this.current_conversation= response.current_conversation;
+                        this.current_conversation = response.current_conversation;
                         this.conversations= response.conversations;
                         this.scrollToBottom();
                     });
+                },
+                sendMessage: function() {
+                    //var $messageBox  = $("#messageBox");
+                    data=  { 
+                        body: this.messageBox ,
+                        conversation: this.current_conversation.name,
+                        user_id: user_id 
+                    };
+                    //var $messageBox  = $("#messageBox");
+                    if (this.messageBox.trim()=='') return;
+                    this.$http.post("/messages",data,function(data) {
+                        this.messageBox='';
+                    });
+                },
+                handleKeypress: function(event) {
+                    if (event.keyCode == 13 && event.shiftKey) {
+                    } else if (event.keyCode == 13){
+                        //var $messageBox  = $("#messageBox");
+                        if (this.messageBox.trim()=='') return;
+                        this.sendMessage();
+                    }
                 },
                 showModal: function (){
                     $('#newMessageModal').modal('show');
