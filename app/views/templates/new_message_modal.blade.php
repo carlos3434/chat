@@ -1,6 +1,6 @@
 <div id="newMessageModal" class="modal fade">
     <div class="modal-dialog">
-        <form v-on:submit.prevent='sendConversation(this)'>
+        <form v-on:submit.prevent='sendConversation'>
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
@@ -10,11 +10,12 @@
                     <div class="form-group">
                         <label>Areas</label>
                         <select class="form-control" v-model="area_id" @change="changeArea">
-                            <option>Debe escoger una area primero</option>
+                            <option selected>Debe escoger una area primero</option>
                             <option v-for="area in areas" v-bind:value="area.id">@{{ area.nombre }}</option>
                         </select>
                         <label>Users</label>
                         <select class="form-control" v-model="users_id">
+                            <option selected>Seleccione usuario</option>
                             <option v-for="user in users" v-bind:value="user.id">@{{ user.username }}</option>
                         </select>
                     </div>

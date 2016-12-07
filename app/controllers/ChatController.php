@@ -30,9 +30,9 @@ class ChatController extends \BaseController {
         $current_conversation = false;
         if(Input::has('conversation')) {
             $current_conversation = $this->conversationRepository->getByName(Input::get('conversation'));
-        } else {
+        } /*else {
             $current_conversation = Auth::user()->conversations()->first();
-        }
+        }*/
         if ($current_conversation) {
             Session::set('current_conversation', $current_conversation->name);
             foreach($current_conversation->messages_notifications as $notification) {
@@ -60,7 +60,7 @@ class ChatController extends \BaseController {
                     return [
                         'created_at'    => $message->created_at->format('Y-m-d H:i:s'),
                         'user'          => $message->user,
-                        'nemonico'      => $message->user->areas->nemonico,
+                        //'nemonico'      => $message->user->areas->nemonico,
                         'body'          => $message->body,
                     ];
                 });
@@ -89,7 +89,7 @@ class ChatController extends \BaseController {
      * @return Response
      */
     public function index() {
-
+/*
         $viewData = array();
 
         if(Input::has('conversation')) {
@@ -114,7 +114,7 @@ class ChatController extends \BaseController {
         }
         
         $viewData['conversations'] = Auth::user()->conversations()->get();
-        
-        return View::make('templates/chat', $viewData);
+        */
+        return View::make('templates/chat');
     }
 }

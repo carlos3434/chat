@@ -67,13 +67,13 @@ Route::post('/conversations/', array(
 	'as' 	 => 'conversations.store',
 	'uses'   => 'ConversationController@store'
 ));
-
+/*
 Route::get('/conversations/', array(
 	'before' => 'auth',
 	'as' 	 => 'conversations.index',
 	'uses'   => 'ConversationController@index'
 ));
-
+*/
 Route::get('areas/{area_id}/users', array(
     'before' => 'auth',
     'as'     => 'areas_users.show',

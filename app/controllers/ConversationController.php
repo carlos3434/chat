@@ -26,7 +26,7 @@ class ConversationController extends \BaseController {
      *
      * @return Response
      */
-    public function index() 
+    /*public function index() 
     {
         $viewData = array();
 
@@ -40,7 +40,7 @@ class ConversationController extends \BaseController {
         $viewData['conversations'] = Auth::user()->conversations()->get();
 
         return View::make('templates/conversations', $viewData);
-    }
+    }*/
 
     /**
      * Store a newly created conversation in storage.

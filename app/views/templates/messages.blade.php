@@ -6,7 +6,7 @@
                 <img class="media-object img-circle" width="30" height="30" :src=" message.user.image_path ">
             </a>
             <div class="media-body">
-                <h5 class="media-heading">@{{ message.user.username+' ( '+message.nemonico+' )' }}</h5>
+                <h5 class="media-heading">@{{ message.user.username }}</h5>
                 <small>@{{ message.body }}</small>
             </div>
         </div>

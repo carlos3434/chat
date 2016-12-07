@@ -34,7 +34,7 @@
     <div class="container" id='chat'>
         <div class="row">
             <div class="col-lg-3 new-message text-right">
-                <a id="btnNewMessage" class="btn btn-sm btn-default" role="button"><i class="fa fa-plus"></i> New Message</a>
+                <a @click.prevent="showModal" class="btn btn-sm btn-default" role="button"><i class="fa fa-plus"></i> New Message</a>
             </div>
         </div>
         <div class="row">
@@ -61,9 +61,6 @@
 
 @section('scripts')
     <script>
-        var
-            current_conversation = "{{ Session::get('current_conversation') }}",
-            user_id   = "{{ Auth::user()->id }}";
         var vm = new Vue({
             http: {
                 root: '/root'
@@ -76,11 +73,27 @@
                 areas:[],
                 users:[],
                 user_id: "{{ Auth::user()->id }}",
+                socket:[]
             },
             ready: function () {
-                //cargar usuarios
-                //cargar areas
-                //notificar cuando badge a pesar que sea conversationn_current
+                this.scrollToBottom();
+                this.socket = io('http://chat:3000')
+                /***
+                    Socket.io Events
+                ***/
+                this.socket.on('welcome', function (data) {
+                    vm.socket.emit('join', { room:  this.user_id });
+                });
+                this.socket.on('joined', function(data) {
+                    //console.log(data.message);
+                });
+                this.socket.on('chat.messages', function(data) {
+                    vm.chat(vm.current_conversation.name);
+                });
+                this.socket.on('chat.conversations', function(data) {
+                   vm.chat(vm.current_conversation.name);
+                });
+                this.getConversations();
                 this.getAreas();
                 this.chat();
             },
@@ -100,6 +113,15 @@
                         vm.areas=response.areas;
                     });
                 },
+                getConversations: function (){
+                    this.$http.get("/users/" + this.user_id + '/conversations',function(response) {
+                        if(response.success && response.result.length > 0) {
+                            $.each(response.result, function(index, conversation) {
+                                vm.socket.emit('join', { room:  conversation.name });
+                            });
+                        }
+                    });
+                },
                 chat : function (conversation) {
                     var request={conversation: conversation };
                     this.$http.post("/chat",request,function(response) {
@@ -109,40 +131,36 @@
                     });
                 },
                 sendMessage: function() {
-                    //var $messageBox  = $("#messageBox");
                     data=  { 
                         body: this.messageBox ,
                         conversation: this.current_conversation.name,
-                        user_id: user_id 
+                        user_id: this.user_id 
                     };
-                    //var $messageBox  = $("#messageBox");
                     if (this.messageBox.trim()=='') return;
                     this.$http.post("/messages",data,function(data) {
                         this.messageBox='';
                     });
                 },
-                sendConversation: function(env){
+                sendConversation: function(){
                     var usuarios;
                     if (!Array.isArray(this.users_id)){
                         usuarios = [this.users_id];
                     }else{
                         usuarios = this.users_id;
                     }
-
-                    data={
+                    request={
                         body:this.body,
                         users:usuarios
                     };
-                    this.$http.post("/conversations",data,function(data) {
-                        getConversations(this.current_conversation.name);
-                        $('#newMessageModal').modal('hide');
+                    this.$http.post("/conversations",request,function(data) {
+                        this.chat(this.current_conversation.name);
                         this.body='';
+                        $('#newMessageModal').modal('hide');
                     });
                 },
                 handleKeypress: function(event) {
                     if (event.keyCode == 13 && event.shiftKey) {
                     } else if (event.keyCode == 13){
-                        //var $messageBox  = $("#messageBox");
                         if (this.messageBox.trim()=='') return;
                         this.sendMessage();
                     }
@@ -153,7 +171,6 @@
                 scrollToBottom: function() {
                     this.handle = setInterval( ( ) => {
                         var $messageList  = $("#messageList");
-
                         if($messageList.length) {
                             $messageList.animate({scrollTop: $messageList[0].scrollHeight}, 500);
                         }
@@ -163,6 +180,5 @@
             }
         });
     </script>
-    <script src="{{ asset('/js/chat.js')}}"></script>
 @stop
 
