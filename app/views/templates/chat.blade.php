@@ -55,6 +55,7 @@
                 </template>
             </div>
         </div>
+        @include('templates/new_message_modal')
     </div>
 @stop
 
@@ -72,12 +73,33 @@
                 conversations:[],
                 current_conversation:[],
                 messages:[],
+                areas:[],
+                users:[],
                 user_id: "{{ Auth::user()->id }}",
             },
             ready: function () {
+                //cargar usuarios
+                //cargar areas
+                //notificar cuando badge a pesar que sea conversationn_current
+                this.getAreas();
                 this.chat();
             },
             methods: {
+                changeArea: function(){
+                    this.$http.get("/areas/"+this.area_id+"/users",function(response) {
+                        this.users=response.users;
+                    });
+                },
+                getAreas: function(){
+                    this.$http.get("/areas",function(response) {
+                        vm.areas=response.areas;
+                    });
+                },
+                getAreas: function(){
+                    this.$http.get("/areas",function(response) {
+                        vm.areas=response.areas;
+                    });
+                },
                 chat : function (conversation) {
                     var request={conversation: conversation };
                     this.$http.post("/chat",request,function(response) {
@@ -97,6 +119,24 @@
                     if (this.messageBox.trim()=='') return;
                     this.$http.post("/messages",data,function(data) {
                         this.messageBox='';
+                    });
+                },
+                sendConversation: function(env){
+                    var usuarios;
+                    if (!Array.isArray(this.users_id)){
+                        usuarios = [this.users_id];
+                    }else{
+                        usuarios = this.users_id;
+                    }
+
+                    data={
+                        body:this.body,
+                        users:usuarios
+                    };
+                    this.$http.post("/conversations",data,function(data) {
+                        getConversations(this.current_conversation.name);
+                        $('#newMessageModal').modal('hide');
+                        this.body='';
                     });
                 },
                 handleKeypress: function(event) {
@@ -126,4 +166,3 @@
     <script src="{{ asset('/js/chat.js')}}"></script>
 @stop
 
-@include('templates/new_message_modal', array('recipients' => $recipients))

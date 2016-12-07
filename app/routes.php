@@ -13,6 +13,7 @@
 
 App::bind('LaravelRealtimeChat\Repositories\Conversation\ConversationRepository', 'LaravelRealtimeChat\Repositories\Conversation\DbConversationRepository');
 App::bind('LaravelRealtimeChat\Repositories\User\UserRepository', 'LaravelRealtimeChat\Repositories\User\DbUserRepository');
+App::bind('LaravelRealtimeChat\Repositories\Area\AreaRepository', 'LaravelRealtimeChat\Repositories\Area\DbAreaRepository');
 
 Route::get('/', function() {
 	return Redirect::route('auth.postLogin');
@@ -71,5 +72,16 @@ Route::get('/conversations/', array(
 	'before' => 'auth',
 	'as' 	 => 'conversations.index',
 	'uses'   => 'ConversationController@index'
+));
+
+Route::get('areas/{area_id}/users', array(
+    'before' => 'auth',
+    'as'     => 'areas_users.show',
+    'uses'   => 'AreaController@show'
+));
+Route::get('/areas/', array(
+	'before' => 'auth',
+	'as' 	 => 'areas.index',
+	'uses'   => 'AreaController@index'
 ));
 
