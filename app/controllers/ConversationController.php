@@ -1,46 +1,6 @@
 <?php
 
-use LaravelRealtimeChat\Repositories\Conversation\ConversationRepository;
-use LaravelRealtimeChat\Repositories\User\UserRepository;
-
 class ConversationController extends \BaseController {
-
-    /**
-     * @var LaravelRealtimeChat\Repositories\Conversation\ConversationRepository
-     */
-    private $conversationRepository;
-
-    /**
-     * @var LaravelRealtimeChat\Repositories\User\UserRepository
-     */ 
-    private $userRepository;
-
-    public function __construct(ConversationRepository $conversationRepository, UserRepository $userRepository) 
-    {
-        $this->conversationRepository = $conversationRepository;
-        $this->userRepository = $userRepository;
-    }
-
-    /**
-     * Display a listing of conversations.
-     *
-     * @return Response
-     */
-    /*public function index() 
-    {
-        $viewData = array();
-
-        $users = $this->userRepository->getAllExcept(Auth::user()->id);
-
-        foreach($users as $key => $user) {
-            $viewData['recipients'][$user->id] = $user->username;
-        }
-        
-        $viewData['current_conversation'] = $this->conversationRepository->getByName(Input::get('conversation'));
-        $viewData['conversations'] = Auth::user()->conversations()->get();
-
-        return View::make('templates/conversations', $viewData);
-    }*/
 
     /**
      * Store a newly created conversation in storage.
@@ -111,7 +71,6 @@ class ConversationController extends \BaseController {
         }
 
         $message->messages_notifications()->saveMany($messages_notifications);
-
-        return Redirect::route('chat.index', array('conversation', $conversation->name));
+        return Response::json(['conversation'=> $conversation->name,'data'=>$data]);
     }
 }

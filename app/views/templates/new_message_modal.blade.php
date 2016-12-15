@@ -14,19 +14,19 @@
                             <option v-for="area in areas" v-bind:value="area.id">@{{ area.nombre }}</option>
                         </select>
                         <label>Users</label>
-                        <select class="form-control" v-model="users_id">
+                        <select class="form-control" v-model="users_id" @change="changeUser">
                             <option selected>Seleccione usuario</option>
                             <option v-for="user in users" v-bind:value="user.id">@{{ user.username }}</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Message</label>
-                        <textarea v-model="body" rows="4" class="form-control"></textarea>
+                        <textarea @keyup.prevent="handleKeypressModal" id='new_message' v-model="body" rows="4" class="form-control"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <input class="btn btn-danger" type="submit" value="Enviar">
+                    <input class="btn btn-danger" type="submit" :disabled="body.trim()===''" value="Enviar">
                 </div>
             </div>
         </form>

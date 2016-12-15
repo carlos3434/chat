@@ -48,9 +48,9 @@
                             @include('templates/messages')
                         </div>
                     </div>
-                    <textarea @keyup.prevent="handleKeypress" v-model='messageBox' class="form-control send-message" rows="3" placeholder="Escribe una respuesta..."></textarea>
+                    <textarea @keyup.prevent="handleKeypress" id='message' v-model='messageBox' class="form-control send-message" rows="3"></textarea>
                     <div class="send-message">
-                        <a @click.prevent="sendMessage" class="text-right btn btn-sm btn-danger pull-right" role="button"><i class="fa fa-send"></i> Enviar mensaje</a>
+                        <a @click.prevent="sendMessage" :disabled="messageBox.trim()===''" class="text-right btn btn-sm btn-danger pull-right" role="button"><i class="fa fa-send"></i> Enviar mensaje</a>
                     </div>
                 </template>
             </div>
@@ -61,6 +61,7 @@
 
 @section('scripts')
     <script>
+        var user_id="{{ Auth::user()->id }}";
         var vm = new Vue({
             http: {
                 root: '/root'
@@ -72,28 +73,37 @@
                 messages:[],
                 areas:[],
                 users:[],
-                user_id: "{{ Auth::user()->id }}",
-                socket:[]
+                user_id: user_id,
+                socket:[],
+                messageBox:'',
+                body:''
             },
             ready: function () {
                 this.scrollToBottom();
-                this.socket = io('http://chat:3000')
+                var socket = io('http://chat:3000')
+
+                this.$http.get("/users/" + user_id + '/conversations',function(response) {
+                    if(response.success && response.result.length > 0) {
+                        $.each(response.result, function(index, conversation) {
+                            socket.emit('join', { room:  conversation.name });
+                        });
+                    }
+                });
                 /***
                     Socket.io Events
                 ***/
-                this.socket.on('welcome', function (data) {
-                    vm.socket.emit('join', { room:  this.user_id });
+                socket.on('welcome', function (data) {
+                    socket.emit('join', { room:  user_id });
                 });
-                this.socket.on('joined', function(data) {
+                socket.on('joined', function(data) {
                     //console.log(data.message);
                 });
-                this.socket.on('chat.messages', function(data) {
+                socket.on('chat.messages', function(data) {
                     vm.chat(vm.current_conversation.name);
                 });
-                this.socket.on('chat.conversations', function(data) {
+                socket.on('chat.conversations', function(data) {
                    vm.chat(vm.current_conversation.name);
                 });
-                this.getConversations();
                 this.getAreas();
                 this.chat();
             },
@@ -103,26 +113,16 @@
                         this.users=response.users;
                     });
                 },
-                getAreas: function(){
-                    this.$http.get("/areas",function(response) {
-                        vm.areas=response.areas;
-                    });
+                changeUser: function(){
+                    this.body='';
+                    $('#new_message').focus();
                 },
                 getAreas: function(){
                     this.$http.get("/areas",function(response) {
                         vm.areas=response.areas;
                     });
                 },
-                getConversations: function (){
-                    this.$http.get("/users/" + this.user_id + '/conversations',function(response) {
-                        if(response.success && response.result.length > 0) {
-                            $.each(response.result, function(index, conversation) {
-                                vm.socket.emit('join', { room:  conversation.name });
-                            });
-                        }
-                    });
-                },
-                chat : function (conversation) {
+                chat: function (conversation) {
                     var request={conversation: conversation };
                     this.$http.post("/chat",request,function(response) {
                         this.current_conversation = response.current_conversation;
@@ -143,17 +143,20 @@
                 },
                 sendConversation: function(){
                     var usuarios;
+                    if (this.users_id=='Seleccione usuario') {
+                        return;
+                    }
                     if (!Array.isArray(this.users_id)){
                         usuarios = [this.users_id];
-                    }else{
+                    } else {
                         usuarios = this.users_id;
                     }
                     request={
                         body:this.body,
                         users:usuarios
                     };
-                    this.$http.post("/conversations",request,function(data) {
-                        this.chat(this.current_conversation.name);
+                    this.$http.post("/conversations",request,function(response) {
+                        this.chat(response.conversation);
                         this.body='';
                         $('#newMessageModal').modal('hide');
                     });
@@ -165,7 +168,17 @@
                         this.sendMessage();
                     }
                 },
-                showModal: function (){
+                handleKeypressModal: function(event) {
+                    if (event.keyCode == 13 && event.shiftKey) {
+                    } else if (event.keyCode == 13){
+                        if (this.body.trim()=='') return;
+                        this.sendConversation();
+                    }
+                },
+                showModal: function () {
+                    this.area_id='';
+                    this.users_id='';
+                    this.body='';
                     $('#newMessageModal').modal('show');
                 },
                 scrollToBottom: function() {
@@ -176,9 +189,10 @@
                         }
                         clearInterval(this.handle);
                     },1);
+                    this.messageBox='';
+                    $('#message').focus();
                 }
             }
         });
     </script>
 @stop
-

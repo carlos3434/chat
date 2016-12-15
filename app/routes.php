@@ -18,11 +18,6 @@ App::bind('LaravelRealtimeChat\Repositories\Area\AreaRepository', 'LaravelRealti
 Route::get('/', function() {
 	return Redirect::route('auth.postLogin');
 });
-Route::post('/chat/', array(
-    'before' => 'authChat',
-    'as'     => 'chat.index',
-    'uses'   => 'ChatController@conversation'
-));
 Route::get('/login', array(
 	'as'   => 'auth.getLogin',
 	'uses' => 'AuthController@getLogin'
@@ -37,18 +32,17 @@ Route::get('/logout', array(
 	'as'   => 'auth.logout',
 	'uses' => 'AuthController@logout'
 ));
+Route::post('/chat/', array(
+    'before' => 'authChat',
+    'as'     => 'chat.index',
+    'uses'   => 'ChatController@conversation'
+)); 
 
 Route::get('/chat/', array(
 	'before' => 'auth',
 	'as'     => 'chat.index',
 	'uses'   => 'ChatController@index'
-));
-
-Route::get('/messages/', array(
-	'before' => 'auth',
-	'as'     => 'messages.index',
-	'uses'   => 'MessageController@index'
-));
+)); 
 
 Route::post('/messages/', array(
 	'before' => 'auth',
@@ -60,28 +54,22 @@ Route::get('users/{user_id}/conversations', array(
 	'before' => 'auth',
 	'as'	 => 'conversations_users.index',
 	'uses'	 => 'ConversationUserController@index'
-));
+)); 
 
 Route::post('/conversations/', array(
 	'before' => 'auth',
 	'as' 	 => 'conversations.store',
 	'uses'   => 'ConversationController@store'
 ));
-/*
-Route::get('/conversations/', array(
-	'before' => 'auth',
-	'as' 	 => 'conversations.index',
-	'uses'   => 'ConversationController@index'
-));
-*/
+
 Route::get('areas/{area_id}/users', array(
     'before' => 'auth',
     'as'     => 'areas_users.show',
     'uses'   => 'AreaController@show'
-));
+)); 
 Route::get('/areas/', array(
 	'before' => 'auth',
 	'as' 	 => 'areas.index',
 	'uses'   => 'AreaController@index'
-));
+)); 
 
